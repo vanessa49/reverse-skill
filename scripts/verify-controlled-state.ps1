@@ -48,7 +48,7 @@ foreach ($path in $mustRemainUpstream) {
     }
     $parts = @(([string]$treeLines[0]) -split '\s+')
     if ($parts.Count -lt 3 -or $parts[1] -ne 'blob') {
-        throw "Unexpected git ls-tree output for $path: $($treeLines[0])"
+        throw "Unexpected git ls-tree output for ${path}: $($treeLines[0])"
     }
     $actual = [string]$parts[2]
     if ($actual -ne $expected) {
