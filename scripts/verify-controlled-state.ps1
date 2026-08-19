@@ -29,22 +29,35 @@ if ($LASTEXITCODE -ne 0) {
     throw "Current HEAD is not descended from approved upstream commit: $approved"
 }
 
-$criticalPaths = @($lock.critical_upstream_blobs.PSObject.Properties | ForEach-Object { $_.Name })
+$criticalProperties = @($lock.critical_upstream_blobs.PSObject.Properties)
+$criticalPaths = @($criticalProperties | ForEach-Object { $_.Name })
 $allowedOverlayChanges = @('AGENTS.md')
 $mustRemainUpstream = @($criticalPaths | Where-Object { $_ -notin $allowedOverlayChanges })
 
 foreach ($path in $mustRemainUpstream) {
-    $expected = [string]$lock.critical_upstream_blobs.$path
-    $actual = (& $git.Source -C $RepoRoot rev-parse "$approved`:$path" 2>$null | Select-Object -First 1)
-    if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace([string]$actual)) {
+    $property = $criticalProperties | Where-Object { $_.Name -eq $path } | Select-Object -First 1
+    if ($null -eq $property) {
+        throw "Missing lock metadata for $path"
+    }
+    $expected = [string]$property.Value
+
+    $treeLines = @(& $git.Source -C $RepoRoot ls-tree $approved -- $path 2>$null)
+    $treeExit = $LASTEXITCODE
+    if ($treeExit -ne 0 -or $treeLines.Count -ne 1) {
         throw "Cannot resolve approved upstream blob for $path"
     }
-    if ([string]$actual -ne $expected) {
+    $parts = @(([string]$treeLines[0]) -split '\s+')
+    if ($parts.Count -lt 3 -or $parts[1] -ne 'blob') {
+        throw "Unexpected git ls-tree output for $path: $($treeLines[0])"
+    }
+    $actual = [string]$parts[2]
+    if ($actual -ne $expected) {
         throw "Lock metadata mismatch for $path. Expected $expected, approved commit contains $actual"
     }
 
     $changed = @(& $git.Source -C $RepoRoot diff --name-only $approved -- $path)
-    if ($LASTEXITCODE -ne 0) {
+    $diffExit = $LASTEXITCODE
+    if ($diffExit -ne 0) {
         throw "git diff failed for $path"
     }
     if ($changed.Count -gt 0) {
@@ -52,8 +65,9 @@ foreach ($path in $mustRemainUpstream) {
     }
 }
 
-$workingChanges = @(& $git.Source -C $RepoRoot status --porcelain -- @($mustRemainUpstream))
-if ($LASTEXITCODE -ne 0) {
+$workingChanges = @(& $git.Source -C $RepoRoot status --porcelain -- $mustRemainUpstream)
+$statusExit = $LASTEXITCODE
+if ($statusExit -ne 0) {
     throw 'git status failed while checking critical paths'
 }
 if ($workingChanges.Count -gt 0) {
