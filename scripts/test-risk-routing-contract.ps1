@@ -67,8 +67,9 @@ Assert-True (-not [string]::IsNullOrWhiteSpace($verifyModel)) 'Verifier model is
 Assert-True (-not [string]::IsNullOrWhiteSpace($escalationModel)) 'Escalation model is missing.'
 
 $expectedConfigModel = [regex]::Escape($lowModel)
-Assert-True ($config -match "(?m)^enabled\s*=\s*true\s*$") 'Codex subagents must remain enabled.'
-Assert-True ($config -match "(?m)^default_subagent_model\s*=\s*\"$expectedConfigModel\"\s*$") 'Default subagent model does not match routing.'
+Assert-True ($config -match '(?m)^enabled\s*=\s*true\s*$') 'Codex subagents must remain enabled.'
+$configModelPattern = '(?m)^default_subagent_model\s*=\s*"{0}"\s*$' -f $expectedConfigModel
+Assert-True ($config -match $configModelPattern) 'Default subagent model does not match routing.'
 
 $agents = @(
     @{ Path = '.codex\agents\luna_capability_worker.toml'; Name = 'luna_capability_worker'; Model = $lowModel; Sandbox = 'workspace-write' },
@@ -82,9 +83,12 @@ foreach ($agent in $agents) {
     $namePattern = [regex]::Escape([string]$agent.Name)
     $modelPattern = [regex]::Escape([string]$agent.Model)
     $sandboxPattern = [regex]::Escape([string]$agent.Sandbox)
-    Assert-True ($text -match "(?m)^name\s*=\s*\"$namePattern\"\s*$") "Agent name mismatch: $($agent.Path)"
-    Assert-True ($text -match "(?m)^model\s*=\s*\"$modelPattern\"\s*$") "Agent model mismatch: $($agent.Path)"
-    Assert-True ($text -match "(?m)^sandbox_mode\s*=\s*\"$sandboxPattern\"\s*$") "Agent sandbox mismatch: $($agent.Path)"
+    $nameLine = '(?m)^name\s*=\s*"{0}"\s*$' -f $namePattern
+    $modelLine = '(?m)^model\s*=\s*"{0}"\s*$' -f $modelPattern
+    $sandboxLine = '(?m)^sandbox_mode\s*=\s*"{0}"\s*$' -f $sandboxPattern
+    Assert-True ($text -match $nameLine) "Agent name mismatch: $($agent.Path)"
+    Assert-True ($text -match $modelLine) "Agent model mismatch: $($agent.Path)"
+    Assert-True ($text -match $sandboxLine) "Agent sandbox mismatch: $($agent.Path)"
 }
 
 $requiredWorkOrderFields = @(
