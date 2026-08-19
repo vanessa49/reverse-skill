@@ -2,6 +2,8 @@
 
 A work order is the small handoff from reasoning/review to the low-cost execution worker. It is intentionally concise so the worker does not need the full audit context.
 
+The machine-readable authority is `.controlled/work-order.schema.json`. Prefer passing the worker a JSON object that validates against that schema. The text form below is a human-readable rendering of the same fields.
+
 ## Required fields
 
 ```text
@@ -53,6 +55,13 @@ STOP_CONDITIONS:
 - unexpected persistence or external target interaction appears
 - verification fails and rollback is not clearly safe
 ```
+
+## Execution boundary
+
+- An execution work order may authorize only `L1_LOW_REVERSIBLE` or a reviewed `L2_REVIEWED_AUTO` action.
+- `L3_CONSEQUENTIAL` must never be translated directly into an execution work order. It returns to the primary reasoner and, when the policy requires it, the user.
+- L1 requires `L1_REQUIREMENTS_PASS`. L2 requires `L2_PASS` or `L2_PASS_AFTER_ESCALATION` before the execution worker may mutate the host.
+- The worker must stop rather than improvise if the real action exceeds the recorded paths, commands, privilege, persistence, network, or sensitive-data boundary.
 
 ## Execution receipt
 
