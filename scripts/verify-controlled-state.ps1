@@ -1,11 +1,24 @@
 #requires -Version 5
 [CmdletBinding()]
 param(
-    [string]$RepoRoot = (Split-Path -Parent $PSScriptRoot)
+    [string]$RepoRoot = ''
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+
+if ([string]::IsNullOrWhiteSpace($RepoRoot)) {
+    if (-not [string]::IsNullOrWhiteSpace($PSScriptRoot)) {
+        $RepoRoot = Split-Path -Parent $PSScriptRoot
+    }
+    elseif ($MyInvocation.MyCommand.Path) {
+        $RepoRoot = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
+    }
+    else {
+        throw 'Cannot determine repository root. Re-run with -RepoRoot <path>.'
+    }
+}
+$RepoRoot = (Resolve-Path -LiteralPath $RepoRoot).Path
 
 $lockPath = Join-Path $RepoRoot '.controlled\upstream-lock.json'
 if (-not (Test-Path -LiteralPath $lockPath -PathType Leaf)) {

@@ -24,3 +24,20 @@ jobs:
       - name: Verify risk, routing, and execution contract
         shell: powershell
         run: .\scripts\test-risk-routing-contract.ps1
+      - name: Verify nested Windows PowerShell invocation
+        shell: powershell
+        run: |
+          & powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify-controlled-state.ps1
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+          & powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\test-risk-routing-contract.ps1
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+          $skillRoot = Join-Path $env:RUNNER_TEMP 'reverse-skill-test-skills'
+          & powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install-reverse-triage.ps1 -SkillRoot $skillRoot
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+          $installed = Join-Path $skillRoot 'reverse-triage\SKILL.md'
+          if (-not (Test-Path -LiteralPath $installed -PathType Leaf)) {
+            throw "Nested installer did not create expected skill: $installed"
+          }
