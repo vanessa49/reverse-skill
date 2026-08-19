@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/vanessa49/reverse-skill/.controlled/work-order.schema.json",
+  "title": "Controlled reverse-skill execution work order",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "work_order_id",
+    "goal",
+    "risk_level",
+    "review_status",
+    "capability",
+    "allowed_actions",
+    "allowed_paths",
+    "network_boundary",
+    "package_or_tool_identity",
+    "expected_host_changes",
+    "persistence",
+    "pre_state",
+    "verify",
+    "cleanup",
+    "retention",
+    "rollback",
+    "stop_conditions"
+  ],
+  "properties": {
+    "work_order_id": { "type": "string", "minLength": 1 },
+    "goal": { "type": "string", "minLength": 1 },
+    "risk_level": { "enum": ["L1_LOW_REVERSIBLE", "L2_REVIEWED_AUTO"] },
+    "review_status": { "enum": ["L1_REQUIREMENTS_PASS", "L2_PASS", "L2_PASS_AFTER_ESCALATION"] },
+    "capability": { "type": "string", "minLength": 1 },
+    "allowed_actions": { "type": "array", "items": { "type": "string", "minLength": 1 }, "minItems": 1 },
+    "allowed_paths": { "type": "array", "items": { "type": "string", "minLength": 1 }, "minItems": 1 },
+    "network_boundary": { "type": "array", "items": { "type": "string", "minLength": 1 }, "minItems": 1 },
+    "package_or_tool_identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "version_or_commit", "digest"],
+      "properties": {
+        "source": { "type": "string", "minLength": 1 },
+        "version_or_commit": { "type": "string", "minLength": 1 },
+        "digest": { "type": "string", "minLength": 1 }
+      }
+    },
+    "expected_host_changes": { "type": "array", "items": { "type": "string", "minLength": 1 }, "minItems": 1 },
+    "persistence": { "type": "array", "items": { "type": "string", "minLength": 1 }, "minItems": 1 },
+    "pre_state": { "type": "array", "items": { "type": "string", "minLength": 1 }, "minItems": 1 },
+    "verify": { "type": "array", "items": { "type": "string", "minLength": 1 }, "minItems": 1 },
+    "cleanup": { "type": "array", "items": { "type": "string", "minLength": 1 }, "minItems": 1 },
+    "retention": { "type": "array", "items": { "type": "string", "minLength": 1 }, "minItems": 1 },
+    "rollback": { "type": "array", "items": { "type": "string", "minLength": 1 }, "minItems": 1 },
+    "stop_conditions": { "type": "array", "items": { "type": "string", "minLength": 1 }, "minItems": 1 }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "risk_level": { "const": "L1_LOW_REVERSIBLE" } }, "required": ["risk_level"] },
+      "then": { "properties": { "review_status": { "const": "L1_REQUIREMENTS_PASS" } } }
+    },
+    {
+      "if": { "properties": { "risk_level": { "const": "L2_REVIEWED_AUTO" } }, "required": ["risk_level"] },
+      "then": { "properties": { "review_status": { "enum": ["L2_PASS", "L2_PASS_AFTER_ESCALATION"] } } }
+    }
+  ]
+}
