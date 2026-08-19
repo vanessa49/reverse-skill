@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "verified_date": "2026-08-19",
+  "roles": {
+    "PRIMARY_REASONER": {
+      "agent": "parent",
+      "model_policy": "inherit_parent",
+      "expected_current_model": "gpt-5.6-sol",
+      "purpose": "ambiguous or consequential decisions, reverse strategy, structural safety decisions, L3 review, and final acceptance"
+    },
+    "LOW_COST_EXECUTION_WORKER": {
+      "agent": "luna_capability_worker",
+      "model": "gpt-5.6-luna",
+      "model_reasoning_effort": "medium",
+      "purpose": "bounded L1/L2 execution, verification commands, cleanup, rollback, and concise receipts"
+    },
+    "READ_ONLY_VERIFIER": {
+      "agent": "luna_verifier",
+      "model": "gpt-5.6-luna",
+      "model_reasoning_effort": "medium",
+      "purpose": "fast read-only risk classification, diff/config checks, scope checks, and L2 review packets"
+    },
+    "ESCALATION_REVIEWER": {
+      "agent": "terra_security_reviewer",
+      "model": "gpt-5.6-terra",
+      "model_reasoning_effort": "high",
+      "purpose": "read-only review when Luna reports uncertainty, incomplete pinning, unusual host changes, or non-trivial security implications"
+    }
+  },
+  "revalidation_triggers": [
+    "project-scoped subagent smoke test fails",
+    "a configured model becomes unavailable, deprecated, or materially renamed",
+    "Codex custom-agent or project-config schema changes",
+    "OpenAI introduces a clearly better cost/quality model for one of these logical roles",
+    "measured task quality or reliability regresses for a configured role"
+  ],
+  "migration_rule": "Change this mapping and the corresponding .codex/ agent files when models evolve. Do not change the risk policy merely because model names change.",
+  "evidence": [
+    "Notion: Codex Multi-Agent Routing Playbook - Sol / Terra / Luna (smoke-tested 2026-08-09/10)",
+    "OpenAI Codex Subagents documentation verified 2026-08-19"
+  ]
+}
