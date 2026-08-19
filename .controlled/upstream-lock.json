@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "upstream_repository": "zhaoxuya520/reverse-skill",
+  "approved_upstream_commit": "a9ed8d04ad58894a16c3b9ae918ccecb8131d23e",
+  "audited_at": "2026-08-19T17:13:00+08:00",
+  "verdict": "READ_ONLY_APPROVED",
+  "execution_default": "BLOCKED",
+  "critical_upstream_blobs": {
+    "AGENTS.md": "a9c5d9d545e9b1ce2bf6e866f31defa8a82f7514",
+    "RULES.md": "de17234a4a47f2c846a4985c3feb0e502584af18",
+    "skills/scripts/bootstrap-reverse.ps1": "757eaa11f19ae9eadad2ca1d837d3a1d4b7a565d",
+    "skills/scripts/bootstrap-manifest.json": "b693856a6f3a127939ed448bdb5de7965d3b4f3c",
+    "skills/scripts/lib/BootstrapSupplyChain.ps1": "36dbd271aad73b45cbaf43aaf87660a8432553e1",
+    "skills/ops/scope-contract.md": "a65dc764e90a9557418f4ad8eaf3f6243bafa346",
+    "skills/ops/skill-supply-chain.md": "f3f11fd7d0da0ab2784136af31846dfc0b58eda7",
+    "skills/ida-reverse/scripts/install-autostart.ps1": "ba7b813bff165823b149b5fa8d0d506a745f269c",
+    "docs/PACKAGE-SECURITY-AUDIT.md": "4296daae7af5baacd09254bbd84a200848acd16f",
+    ".github/workflows/ci.yml": "adde5f84088a3b196b40e6adb4880d1efe937916"
+  }
+}
