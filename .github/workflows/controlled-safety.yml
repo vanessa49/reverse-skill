@@ -11,11 +11,16 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 0
-      - name: Validate controlled policy JSON
+      - name: Validate controlled JSON
         shell: powershell
         run: |
           Get-Content .controlled\reverse-skill-policy.json -Raw -Encoding UTF8 | ConvertFrom-Json | Out-Null
           Get-Content .controlled\upstream-lock.json -Raw -Encoding UTF8 | ConvertFrom-Json | Out-Null
+          Get-Content .controlled\model-routing.json -Raw -Encoding UTF8 | ConvertFrom-Json | Out-Null
+          Get-Content .controlled\work-order.schema.json -Raw -Encoding UTF8 | ConvertFrom-Json | Out-Null
       - name: Verify audited upstream surface did not drift
         shell: powershell
         run: .\scripts\verify-controlled-state.ps1
+      - name: Verify risk, routing, and execution contract
+        shell: powershell
+        run: .\scripts\test-risk-routing-contract.ps1
